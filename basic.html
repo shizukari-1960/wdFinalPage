@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8">
+	<title>Code discord bot in Python</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <style type = "text/css">
+        p {
+            margin: 0;
+            text-indent: 4ch;
+        }
+        img {
+            width: 100%;
+            max-width: 900px;
+        }
+        #_content_area {
+            margin-left: 6ch;
+            margin-right: 3ch;
+        }
+        pre {
+            white-space: normal;
+            padding-left: 8ch;
+        }
+        code {
+            white-space: normal;
+        }
+        div._code {
+            font-size: large;
+            background-color: dimgray;
+        }
+        ul._code {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- basicStruct --> 
+<div data-role="page" id="basic" data-theme="b">
+
+	<div data-role="header" data-position = "fixed">
+		<h1>discord.py</h1>
+        <a href="index.html" class="ui-btn-left ui-btn ui-btn-inline ui-btn-icon-left ui-icon-home ui-btn-icon-notext"></a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" id="_content_area">
+        <h1>基礎建構</h1>
+            <hr>
+            <br>
+            
+            <p>在經過前期準備工作後，現在便可以正式進入寫程式的部分了。</p>
+            <p>此節將會著重介紹每一個機器人都應該會有的基本框架，與我個人在撰寫過程中習慣使用的一些常用指令。</p>
+            <br>
+        <h3>1. 引入庫</h3><hr>
+            <br>
+            <p>我們先使用pip對庫進行引入。</p>
+            <p>第一項為discord官方提供的庫，第二項為管理環境變數使用的庫，由於將token直接放置於檔案內時，在使用如github等版本管理軟體時可能會產生安全問題，故建議安裝。</p>
+            <br>
+            <p>Terminal:</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <li>pip install discord</li>
+                    <li>pip install dotenv</li>
+                </ul>
+            </pre>  
+        </div>
+        <br>
+        <h3 id="logIn">2. 簡易範例:登入提示</h3><hr>
+            <br>
+            <p>隨後我們便可由下列的基本框架開始，請注意複製後須自行縮排。</p>
+            <br>
+            <p>python3.10:</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <br>
+                    <li>import discord</li>
+                    <li>import os</li>
+                    <br>
+                    <li>from dotenv import load_dotenv</li>
+                    <br>
+                    <li>load_dotenv() #載入環境變數</li> 
+                    <li>os.chdir(os.path.dirname(os.path.abspath(__file__))) #調整相對路徑到以此檔案為基準</li>
+                    <br>
+                    <li>token = os.getenv('token') #取出值</li> 
+                    <li>client = discord.Client(intents=discord.Intents.all()) #建立client物件以節省打字量 intent為各種訊息存取權，由於先前的設定我們可以選擇全部。</li>
+                    <br>
+                    <li>@client.event #用以呼叫函式組</li>
+                    <br>
+                    <li>async def on_ready(): #當就緒時>進行下列動作</li>
+                    <ul class="_code">
+                        <li>print(f'目前登入身份：{client.user}')</li>
+                    </ul>
+                    <li>client.run(token) #須注意本列必須放在程式最末尾</li>
+                    <br>
+                </ul>
+            </pre>
+        </div>
+            <br>
+            <p>直到這邊還不能直接運行，由於token並未載入環境變數，我們需要建立一個名為".env"的文件於python源代碼所保存的目錄，並且在內部貼入'token = "[複製下來的token]"'。</p>
+            <dd><img src="assets/basicStruc/envFile.png"></dd>
+            <p>這個操作最好在IDE內操作，檔案總管不允許建立只有副檔名的檔案。</p>
+            <br>
+            <p>如此便構成了最基礎的機器人，在上線時會在Terminal打印自身的名字。</p>
+            <p>嘗試運行的話便可觀察到其上線狀態與Terminal中的訊息。</p>
+        <h3>3. 關鍵字監聽與訊息發送</h3><hr>
+            <br>
+            <p>我們可以利用</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <li>@client.event </li>
+                    <li>async def on_message(message): #當有訊息傳出時....</li>
+                    <ul class="_code">
+                        <li>if message.content.startswith("XXXX"): #若訊息開頭為XXXX 則....</li>
+                    </ul>
+                </ul>
+            </pre>
+        </div>
+            <p>來進行關鍵字的探測</p>
+            <br>
+            <p>此功能是大部分指令觸發的前提，由於其監聽的訊息是所有訊息，因此最好使用較為少用的字串作為前綴。</p>
+            <p>舉例來說，若是一個用來下載某些東西的指令，使用".dl","!dl"等皆可，但應避免"dl"或"download"一類直接使用單字作為開頭的觸發語，以免在正常聊天時錯誤觸發。</p>
+            <br>
+            <p>隨後則是發送訊息的方法</p>
+            <p>在on_message函式下方，我們可以使用</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <li>await message.channel.send("XXXX")</li>
+                </ul>
+            </pre>
+        </div>
+            <p>用以在接收到訊息的頻道發送訊息。</p>
+            <br>
+            <p>以下提供一個範例:</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <li>if message.author == client.user: #避免自身發出的訊息觸發指令</li>
+                    <ul class="_code">
+                        <li>return</li>
+                    </ul>
+                    <br>
+                    <li>if message.content.startswith(".hello")</li>
+                    <ul class="_code">
+                        <li>await message.channel.send("Hello world!")</li>
+                    </ul>
+                </ul>
+            </pre>
+        </div>    
+            <img src="assets/basicStruc/helloWorld.png">
+            <h3>4. 基礎練習</h3><hr>
+            <p>試著使用上述的語法，建立自己的第二個指令吧。</p>
+            <br>
+            <h3>5. 多傳入值與函式</h3><hr>
+            <p>我們能接收到的傳入值是字串形式的完整訊息，因此我們可以使用split的內置method來切分訊息為list，進而達成多輸入的目的。</p>
+            <p>如果要處理更為複雜的任務，我們便應該將功能寫為函式以保證可讀性。</p>
+        <div class="_code">
+            <pre>
+                <ul class="_code">
+                    <li>if message.content.startswith(".strConnect"):</li>
+                    <ul class="_code">
+                        <li>contents = message.content.split(" ")</li>
+                        <li>rply = contents[1] + contents[2]</li>
+                        <br>
+                        <li>await message.channel.send(f"{rply}")</li>
+                    </ul>
+                    <br>
+                    <li>if message.content.startswith(".plus")</li>
+                    <ul class="_code">
+                        <li>contents = message.content.split(" ")</li>
+                        <li>try: #在發生錯誤時傳出except的值</li>
+                        <ul class="_code">
+                            <li>rply = plus(content[1], content[2])</li>
+                            <li>await message.channel.send(f"{rply}")</li>
+                        </ul>
+                        <li>except:</li>
+                        <ul class="_code">
+                            <li>await message.channel.send("傳入值有誤")</li>
+                        </ul>
+                    </ul>
+                    <li>def plus(x: int, y: int):</li>
+                    <ul class="_code">
+                        <li>x, y = int(x), int(y)</li>
+                        <li>return x + y</li>
+                    </ul>
+                </ul>
+            </pre>
+        </div>
+            <p>可以期望看到如下的結果。</p>
+            <img src="assets/basicStruc/funcTrail.png">
+    
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<p>Copyright(C) 2024, code shared with MIT Licence.</p>
+	</div><!-- /footer -->
+</div>
+<!-- /basicStruct -->

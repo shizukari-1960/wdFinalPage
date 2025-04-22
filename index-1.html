@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8">
+	<title>Code discord bot in Python</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <style type = "text/css">
+        p {
+            margin: 0;
+            text-indent: 4ch;
+        }
+        img {
+            width: 100%;
+            max-width: 900px;
+        }
+        #_content_area {
+            margin-left: 6ch;
+            margin-right: 3ch;
+        }
+        pre {
+            white-space: normal;
+            padding-left: 8ch;
+        }
+        code {
+            white-space: normal;
+        }
+        div._code {
+            font-size: large;
+            background-color: dimgray;
+        }
+        ul._code {
+            list-style-type: none;
+        }
+        
+
+        
+    </style>
+    <script>
+        function inviteURL()
+        {
+            $appid = $("#appid").val();
+            $perms = $("#perms").val();
+
+            
+
+            $url = "https://discord.com/api/oauth2/authorize?client_id=" + $appid.toString() + "&permissions=" + $perms.toString() + "&scope=bot";
+            
+            
+            document.getElementById("inviteURL").innerHTML = $url;
+        }
+    </script>
+</head>
+<body>
+
+<!-- Home -->
+<div data-role="page" id="home" data-theme="b">
+
+	<div data-role="header" data-position = "fixed">
+		<h1>discord.py</h1>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" id = "_content_area">
+        
+        <img src = assets/discordPy.png width="100%">
+        
+        <br><br>
+        <h3>discord bot 簡介</h3>
+        <hr>
+        <p>discord機器人在群組中可以扮演相當重要的角色，能夠自動化的幫助管理員進行需要複雜操作的任務，如自動分發身分組、刪除敏感文字等管理伺服器的功能，亦可擁有圖片去背、下載音樂、翻譯甚至對接AI等各種功能。</p>
+        <br>
+        <h3>discord.py 簡介</h3>
+        <hr>
+        <p>discord.py 是一個現代化、容易使用的API，並支援許多不同的特性，以Python進行實作。</p>
+        <p>本頁將提供製作一個discord機器人所需要的基礎知識與操作範例，請確保您已經掌握了足夠的python基本語法能力與能確切使用的開發環境，此類教學相當容易於網路上找到，在此並不贅述。</p>
+        <p>本演示一律以Microsoft vscode進行實作，運行於python3.10.10、x64win環境，所有示例基於<a href="https://discordpy.readthedocs.io/en/stable/" target="_blank">discord.py API document</a>。</p>
+        <br>
+        
+        <h1>前置工作</h1>
+        <hr>
+        <br>
+        <p>在正式開始前、你應該先做好如下的準備工作。</p>
+        <menu type="disc">
+            <br>
+            <li><a href="#dcApp">進行discord應用程式申請</a></li>
+        </menu>
+        <br>
+        <h1>正式開始</h1>
+        <hr>
+        <br>
+        <p>從此處開始，會從較為簡易基礎的功能開始實現、後者則較為進階，可能會需要較進階的理解。</p>
+        <menu type="disc">
+            <br>
+            <li><a href="basic.html">基礎實現</a></li>
+            <p>關於如何監聽指令、與發送訊息的操作。</p>
+            <br>
+            <li><a href="advanced.html">進階擴展</a></li>
+            <p>檔案發送與多線程。</p>
+            <br>
+        </menu>
+
+		
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<p>Copyright(C) 2024, code shared with MIT Licence.</p>
+	</div><!-- /footer -->
+</div>
+<!-- /Home -->
+
+
+
+
+<!-- dcapp --> 
+<div data-role="page" id="dcApp" data-theme="b">
+
+	<div data-role="header" data-position = "fixed">
+		<h1>discord.py</h1>
+        <a href="#home" class="ui-btn-left ui-btn ui-btn-inline ui-btn-icon-left ui-icon-home ui-btn-icon-notext"></a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" id = "_content_area">
+        
+        <h1>申請discord API權限</h1>
+            <hr><br>
+            <p>製作discord機器人時，向官方申請使用其API的密鑰是必須的操作，在啟用機器人時也必須使用到密鑰，此節的目的為取得所需的密鑰。</p>
+            <br>
+        <h3>1. 前往開發者中心</h3><hr>
+            <p>前往<a href="https://discord.com/developers/applications" target="_blank">discord Developer Portal</a>，你會被要求登入discord帳號。</p>
+            <br>
+        <h3>2. 創建應用程式</h3><hr>
+            <p>登入完成後，點擊新增應用程式，隨後可對其進行命名，該名稱會與其自動整合身分組相同。
+            <br><br>
+            <img src="assets/dcApp/applicationDashBoard.png">
+            <br><br>
+            <img src="assets/dcApp/naming.png">
+            <br><br>
+            
+        <h3>3. 點選右側欄中的"Bot"以創建Bot。</h3><hr>
+            <img src="assets/dcApp/botCreate.png">
+            <br><br>
+            <p>在此處，你可以替機器人進行命名，並上傳頭像。</p><br>
+            <p>接下來向下捲動頁面，將"Privileged Gateway Intents"項內的選項全部選取。</p>
+            <br>
+            <img src="assets/dcApp/intentCtrl.png">
+            <br><br>
+            
+        <h3>4. 複製密鑰</h3><hr>
+            <p>點選"Reset Token"按鈕來取得密鑰。</p>
+            <p>請注意: token僅會在點選重置token按鈕後顯示，並且只會顯示一次，這個token包含你的機器人的控制權，請妥善進行保存，避免遭惡意人士濫用，濫用API的行為可能導致帳號停權等處罰。
+            <br><br>
+            <img src="assets/dcApp/tokenCopy.png">
+            <img src="assets/dcApp/token.png">
+            <br><br>
+            
+        <h3>5. 選擇權限建立邀請連結</h3><hr>
+            <p>若要測試你的機器人，邀請其至你的伺服器是必要的，因此你需要一個能夠使其進入你的伺服器的連結。</p>
+            <p>下方將會提供一個網址產生器、你會需要作為辨識用途的application ID與設定權限的permissions integer兩種數據。</p>
+        <h4>Permissions Integer</h4>
+            <p>向下捲動頁面到最底部，並勾選需要的權限並點擊右下角的複製，若不確定需要何種權限，參照圖片上的勾選便可完成本次教學需要的一切功能。</p>
+            <br>
+            <img src="assets/dcApp/perms.png">
+            <br><br>
+        <h4>Application ID</h4>
+            <p>點擊側邊欄的"General Infomation" 便可找到Application ID.</p>
+            <br>
+            <img src="assets/dcApp/appID.png">
+            <br>
+            <br>
+            
+        <h3>6.邀請網址產生器</h3><hr>
+
+            <label for="appID">Application ID:</label>
+                <input type="text" name="appid" id="appid" value="" autocomplete="off">
+            <label for="perms">Permissions integer:</label>
+                <input type="text" name="perms" id="perms" value="" autocomplete="off">
+            <button onclick="inviteURL()">送出</button>
+            
+            <p>產生網址如下:</p>
+            <h4 id="inviteURL"></h4>
+
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<h4>--------</h4>
+	</div><!-- /footer -->
+</div>
+<!-- /dcApp -->
+
+
+
+
+
+
+
+<!-- blank page example --> 
+<div data-role="page" id="blank" data-theme="b">
+
+	<div data-role="header" data-position = "fixed">
+		<h1>discord.py</h1>
+        <a href="#home" class="ui-btn-left ui-btn ui-btn-inline ui-btn-icon-left ui-icon-home ui-btn-icon-notext"></a>
+	</div><!-- /header -->
+
+	<div role="main" class="ui-content" id="_content_area">
+    
+	</div><!-- /content -->
+
+	<div data-role="footer">
+		<h4>Page End</h4>
+	</div><!-- /footer -->
+</div>
+<!-- blank page end -->
+
+
+</body>
+</html>

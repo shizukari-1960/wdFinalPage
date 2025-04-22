@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset = "utf-8">
+	<title>Code discord bot in Python</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+    <script src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
+    <style type = "text/css">
+        p {
+            margin: 0;
+            text-indent: 4ch;
+        }
+        img {
+            width: 100%;
+            max-width: 900px;
+        }
+        #_content_area {
+            margin-left: 6ch;
+            margin-right: 3ch;
+        }
+        pre {
+            white-space: normal;
+            padding-left: 8ch;
+        }
+        code {
+            white-space: normal;
+        }
+        div._code {
+            font-size: large;
+            background-color: dimgray;
+        }
+        ul._code {
+            list-style-type: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- blank page example --> 
+    <div data-role="page" id="blank" data-theme="b">
+
+        <div data-role="header" data-position = "fixed">
+            <h1>discord.py</h1>
+            <a href="index.html" class="ui-btn-left ui-btn ui-btn-inline ui-btn-icon-left ui-icon-home ui-btn-icon-notext"></a>
+        </div><!-- /header -->
+
+        <div role="main" class="ui-content" id="_content_area">
+            <h1>進階擴展</h1>
+            <hr>
+            <h3>1. 檔案操作</h3>
+            <hr><br>
+            <p>利用 <code>discord.File()</code> 的內建class，我們可以很容易的在訊息內附帶檔案，同樣的，我們也可以使用 <code>message.attachments[n]</code> 來取得使用者傳送的檔案，因此我們便可以開發需要檔案互動的功能。</p>
+            <p>以下舉例一圖片去背的實作: 請注意、此處並不提供可供引入的module。</p>
+            <div class="_code">
+                <pre>
+                    <ul class="_code">
+                        <li>if message.content.startswith(".rembg"):</li>
+                        <ul class="_code">
+                            <li>if message.attachments:</li>
+                            <ul class="_code">
+                                <li>filename = imageProcess.rembg(message.attachments[0].url) #傳入值為檔案url 傳出值為去背後圖片路徑 檔案類別過濾在函數內處理</li>
+                                <li>img = discord.File(f'{filename}')</li>
+                                <li>await message.channel.send(file = img)</li>
+                                <li>os.remove(filename) #發送完後本地即可刪除</li>
+                            </ul>
+                            <li>else: #不包含檔案的情況</li>
+                            <ul class="_code">
+                                <li>await message.channel.send(f"File not contained in message.")</li>
+                            </ul>
+                        </ul>
+                    </ul>
+                </pre>  
+            </div>
+            <h3>2. 多線程</h3>
+            <hr><br>
+            <p>請注意:本節使用的內容大部份有關於asyncio，邏輯相對的較為複雜，無法理解的話或可跳過。</p>
+            <p>discord bot的處理方式是單線程，並且並不編譯器密集，因此在處理需要長時間計算或者等待的任務時，其他的功能將會無法進行，以下進行一個範例。</p>
+            <div class="_code">
+                <pre>
+                    <ul class="_code">
+                        <li>if message.content.startswith(".take_some_time_thing"):</li>
+                        <ul class="_code">
+                            <li>some_longtime_func()</li>
+                            <li>await message.channel.send("a")</li>
+                        </ul>
+                        <li>if message.content.startswith(".some_quickly_thing"):</li>
+                        <ul class="_code">
+                            <li>await message.channel.send("Starburst stream!")</li>
+                        </ul>
+                        <br>
+                        <li>---some other place---</li>
+                        <br>
+                        <li>def some_longtime_func():</li>
+                        <ul class="_code">
+                            time.sleep(100)
+                        </ul>
+                    </ul>
+                </pre>  
+            </div>
+            <p>若試著運行的話，我們可以發現當我們輸入第一個 <code>.take_some_time_thing</code> 指令後，立刻輸入第二個指令其將不會運行。</p>
+            <p>在python中，我們有數種不同方法可以針對程式進行平行處理，分別為asyncio中的 <code>asyncio.gather(coro_or_future: _FutureLike)</code> 、multiprocessing中的 <code>multiprocessing.Process(target: callable, args)</code> 類別與threading中的 <code>threading.Thread(target: callable)</code>。</p>
+            <br>
+            <p>雖然我們似乎擁有許多方法，但實際上只有使用asyncio結合threading是可用的，儘管需要考慮線程安全性的問題需處理，但依然是唯一方法。</p>
+            <p>multiprocessing由於windows環境下，GIL的作用下無法使用os.fork而完全不可用，因此不必考慮。</p>
+            <p>由於discord本身是異步的，時間消耗長的函式若出現在 <code>on_message</code> 內將會占用許久時間導致loop內其餘的task無法工作。</p>
+            <p>因此實作的邏輯在於，把快速的動作放進asyncio的eventloop、把執行的慢的放進thread，如果需要返回的話，在thread內進行返回，不在eventloop進行等待，使await的物件們越快放權越好。</p>
+            <p>我們可以整理邏輯如圖:</p>
+            <img src="assets/advanced/workloop.png">
+            <p>以下提供一個參照上面範例的示例:</p>
+            <div class="_code">
+                <pre>
+                    <ul class="_code">
+                        <li>if message.content.startswith(".take_some_time_thing"):</li>
+                        <ul class="_code">
+                            <li>loop = asyncio.get_event_loop() #取得現在的loop</li>
+                            <li>handler = Thread(target=some_longtime_func, args=(message,loop,)) #target不可實例化、args要使用字組傳入(只有一個傳入值要用(value,)否則無法被識別為tuple)、需要更多傳入值請使用**kwargs</li>
+                            <li>handler.start()</li>
+                            <li>print(f'[{datetime.now()}] Thread Start')</li>
+                            <br>
+                            <li>asyncio.create_task(some_another_async_func(message)) #不能用run、由於已經存在workloop</li>
+                        </ul>
+                        <br>
+                        <li>if message.content.startswith(".some_quickly_thing"):</li>
+                        <ul class="_code">
+                            <li>await message.channel.send("Starburst stream!")</li>
+                        </ul>
+                        <br>
+                        <li>---some other place---</li>
+                        <br>
+                        <li>def some_longtime_func(message, loop: asyncio.AbstractEventLoop) -> None:</li>
+                        <ul class="_code">
+                            <li>for _ in range(10):</li>
+                            <ul class="_code">
+                                <li>print(_)</li>
+                                <li>sleep(1)</li>
+                            </ul>
+                            <li>processed = "Processed Sth abababababa"</li>
+                            <br>
+                            <li>asyncio.run_coroutine_threadsafe(send_message(message_obj = message, msg = processed),loop=loop) # 跨thread傳遞事件用，由於屬於不同workloop必須如此。</li>
+                            <li>print(f'[{datetime.now()}] Thread Ended.')</li>
+                        </ul>
+                        <li>async def send_message(message_obj: discord.message, msg: str = None, file: str = None):</li>
+                        <ul class="_code">
+                            <li>message = message_obj</li>
+                            <li>if file:</li>
+                            <ul class="_code">
+                                <li>await message.channel.send(f"{msg}", file=discord.File(file), reference = message)</li>
+                            </ul>
+                            <li>else:</li>
+                            <ul class="_code">
+                                await message.channel.send(f"{msg}")
+                            </ul>
+                        </ul>
+                    </ul>
+                </pre>  
+            </div>
+            <p>運行後可以達成下列的結果，我們在運行<code>some_longtime_func</code>時將可以同時獲取<code>some_quickly_thing</code>傳回的結果。</p>
+            <br>
+            <img src="assets/advanced/result.png">
+            <p>Error Catch:</p>
+            <p>以下提供了數個我在調試或學習過程中曾經遇到過的錯誤。</p>
+            <li>RuntimeError: Timeout context manager should be used inside a task</li>
+            <p><code>asyncio.create_task()</code>方法中，提供的coro未實例化(就是沒加括號)</p>
+            <li>...got Future attached to a different loop</li>
+            <p>在thread裡面產生了另一個event loop並調用了原本eventloop中的object，使用 <code>run_coroutine_threadsafe(coro, loop)</code> 方法並顯式提供原本的loop來將task傳回原本的loop。</p>
+            
+            
+        </div><!-- /content -->
+
+        <div data-role="footer">
+            <p>Copyright(C) 2024, code shared with MIT Licence.</p>
+        </div><!-- /footer -->
+    </div>
+    <!-- blank page end -->
+
+
+</body>
+</html>
